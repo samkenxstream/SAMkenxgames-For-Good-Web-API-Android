@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Games-For-Good-Web-API-Android</string>
+    <string name="bio_text">Biometrics</string>
+    <string name="link_text">Universal Links</string>
+    <string name="retrofit_text">Web API</string>
+    <string name="log_in_title">Please Log In</string>
+    <string name="log_in_button">Log In</string>
 </resources>
