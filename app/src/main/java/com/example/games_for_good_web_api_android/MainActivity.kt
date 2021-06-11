@@ -18,5 +18,9 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, WebAPIActivity::class.java)
             startActivity(intent)
         }
+        biometrics.setOnClickListener {
+            val intent = Intent(this, BiometricsActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

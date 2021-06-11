@@ -5,4 +5,8 @@
     <string name="retrofit_text">Web API</string>
     <string name="log_in_title">Please Log In</string>
     <string name="log_in_button">Log In</string>
+    <string name="set_encrypt_button">Set Encrypt</string>
+    <string name="retrieve_encrypt_button">Retrieve Encrypt</string>
+    <string name="clear_encrypt_button">Clear Encrypt</string>
+    <string name="dialog_title">Enter your value</string>
 </resources>

@@ -3,7 +3,7 @@
     package="com.example.games_for_good_web_api_android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GamesForGoodWebAPIAndroid">
-        <activity android:name=".TokenActivity"></activity>
+        <activity android:name=".BiometricsActivity"></activity>
+        <activity android:name=".TokenActivity" />
         <activity android:name=".WebAPIActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
