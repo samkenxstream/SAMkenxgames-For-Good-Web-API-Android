@@ -3,7 +3,8 @@
     package="com.example.games_for_good_web_api_android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,15 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GamesForGoodWebAPIAndroid">
-        <activity android:name=".BiometricsActivity"></activity>
-        <activity android:name=".TokenActivity" />
-        <activity android:name=".WebAPIActivity" />
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+        <activity android:name=".UniversalLinkActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -27,8 +20,18 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="jc987.github.io"
-                    android:scheme="https" />
+                    android:scheme="https"
+                    android:host="games-for-good-demo.herokuapp.com" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".BiometricsActivity" />
+        <activity android:name=".TokenActivity" />
+        <activity android:name=".WebAPIActivity" />
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

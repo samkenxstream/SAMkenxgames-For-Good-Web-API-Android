@@ -22,5 +22,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, BiometricsActivity::class.java)
             startActivity(intent)
         }
+
+        universal_links.setOnClickListener {
+            val intent = Intent(this, UniversalLinkActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
