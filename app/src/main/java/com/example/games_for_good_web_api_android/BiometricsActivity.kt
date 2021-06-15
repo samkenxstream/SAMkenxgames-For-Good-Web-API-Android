@@ -90,9 +90,8 @@ class BiometricsActivity : AppCompatActivity() {
 
     private fun getBiometricInfo():BiometricPrompt.PromptInfo{
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("This is title")
-            .setSubtitle("This is subtitle")
-            .setDescription("this is descriotion")
+            .setTitle("Biometric Authentication")
+            .setDescription("Use your system biometrics to decrypt the string!")
             .setNegativeButtonText("Cancel")
             .build()
         return promptInfo
