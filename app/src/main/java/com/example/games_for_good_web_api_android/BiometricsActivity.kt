@@ -31,12 +31,12 @@ import javax.crypto.spec.IvParameterSpec
 import javax.security.auth.x500.X500Principal
 
 class BiometricsActivity : AppCompatActivity() {
-    val PROVIDER =  "AndroidKeyStore"
-    val ALIAS = "keystoreAlias"
-    lateinit var pair: Pair<ByteArray, ByteArray>
+    private val PROVIDER =  "AndroidKeyStore"
+    private val ALIAS = "keystoreAlias"
+    var pair: Pair<ByteArray, ByteArray>?  = null
     var hasValue = false
-    val keystore = KeyStore.getInstance(PROVIDER)
-    lateinit var encryptedMessage : ByteArray
+    private val keystore = KeyStore.getInstance(PROVIDER)
+    var encryptedMessage : ByteArray?  = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,20 +44,24 @@ class BiometricsActivity : AppCompatActivity() {
 
         keystore.load(null)
 
-
         createDialog()
-
 
         val retrieveButton = findViewById<Button>(R.id.retrieve_encrypt_button)
         val setButton = findViewById<Button>(R.id.set_encrypt_button)
         val clearEncryptedButton  = findViewById<Button>(R.id.clear_encrypt_button)
         retrieveButton.setOnClickListener {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                biometricPrompt()
+            if(hasValue){
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                    val biometricPrompt = BiometricPrompt(this, ContextCompat.getMainExecutor(this), getCallbackAuth())
+                    biometricPrompt.authenticate(getBiometricInfo())
+                }
+                else{
+                    decryptString()
+                }
             }
-            else{
-                startDecryption()
-            }
+            else
+                Toast.makeText(this,"There is no value in your keychain!", Toast.LENGTH_SHORT).show()
+
         }
         setButton.setOnClickListener {
             createDialog()
@@ -65,10 +69,10 @@ class BiometricsActivity : AppCompatActivity() {
         }
         clearEncryptedButton.setOnClickListener {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                encrypt("")
+                pair = null
             }
             else{
-                encryptString("")
+                encryptedMessage = null
             }
             hasValue = false
             Toast.makeText(this,"Clearing data",Toast.LENGTH_SHORT).show()
@@ -80,22 +84,9 @@ class BiometricsActivity : AppCompatActivity() {
 
 
     }
-    private fun startDecryption(){
-        if(hasValue)
-            decryptString()
-        else
-            Toast.makeText(this,"There is no value in your keychain!", Toast.LENGTH_SHORT).show()
-    }
 
-    private fun biometricPrompt() {
-        if(hasValue) {
-            val biometricPrompt = BiometricPrompt(this, ContextCompat.getMainExecutor(this), getCallbackAuth())
-            biometricPrompt.authenticate(getBiometricInfo())
-        }
-        else
-            Toast.makeText(this, "There is no value in your keychain!",Toast.LENGTH_SHORT).show()
 
-    }
+
 
     private fun getBiometricInfo():BiometricPrompt.PromptInfo{
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
@@ -111,26 +102,22 @@ class BiometricsActivity : AppCompatActivity() {
         val callback = object: BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 super.onAuthenticationSucceeded(result)
-                showData()
+                val str = decrypt(pair!!.first, pair!!.second)
+                createToastForAuth(str)
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                 super.onAuthenticationError(errorCode, errString)
-                showError(errorCode, errString)
+                createToastForAuth("$errorCode : $errString")
             }
         }
         return callback
     }
 
-    private fun showError(errorCode: Int, errString: CharSequence) {
-        Toast.makeText(this,"$errorCode : $errString",Toast.LENGTH_SHORT).show()
-
+    private fun createToastForAuth(msg:String){
+        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
     }
 
-    private fun showData() {
-        val str = decrypt(pair.first, pair.second)
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
-    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun setUpKeyGenerator(){
@@ -188,17 +175,14 @@ class BiometricsActivity : AppCompatActivity() {
                     setUpKeyGenerator()
                     val str = view.findViewById<EditText>(R.id.encrypt_value_edit_text).text.toString()
                     pair = encrypt(str)
-
-                    Toast.makeText(this,pair.second.toString(),Toast.LENGTH_SHORT).show()
                 }
                 else{
                     val str = view.findViewById<EditText>(R.id.encrypt_value_edit_text).text.toString()
 
                     setUpKeyPairGenerator()
                     encryptString(str)
-                    Toast.makeText(this, "Encrypted string: ${encryptedMessage}",Toast.LENGTH_SHORT).show()
                 }
-                Toast.makeText(this,"Setting data", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"Encrypting data", Toast.LENGTH_SHORT).show()
             }
             .create()
             .show()
@@ -210,7 +194,7 @@ class BiometricsActivity : AppCompatActivity() {
             val privateKeyEntry = keystore.getEntry(ALIAS, null) as KeyStore.PrivateKeyEntry
             val publicKey = privateKeyEntry.certificate.publicKey
 
-            val cipher = Cipher.getInstance("RSA/ECB/NoPadding")
+            val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
             cipher.init(Cipher.ENCRYPT_MODE,publicKey)
             encryptedMessage = cipher.doFinal(data.toByteArray(Charsets.UTF_8))
 
@@ -223,25 +207,14 @@ class BiometricsActivity : AppCompatActivity() {
         try{
             val privateKeyEntry = keystore.getEntry(ALIAS, null) as KeyStore.PrivateKeyEntry
             val privateKey = privateKeyEntry.privateKey as RSAPrivateKey
-            val cipher = Cipher.getInstance("RSA/ECB/NoPadding")
+            val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
             cipher.init(Cipher.DECRYPT_MODE,privateKey)
 
             val unencryptedString = cipher.doFinal(encryptedMessage).toString(Charsets.UTF_8)
 
 
-            val tmp = StringBuilder()
-            var i = unencryptedString.length
-            var char = unencryptedString.substring(i-1,i)
+            Toast.makeText(this, unencryptedString, Toast.LENGTH_SHORT).show()
 
-            while(char != "\u0000"){
-                tmp.insert(0,char)
-                i-=1
-                char = unencryptedString.substring(i-1,i)
-            }
-
-            Toast.makeText(this, tmp.toString(), Toast.LENGTH_SHORT).show()
-            println(unencryptedString)
-            println(tmp.toString())
         }
         catch (e: Exception){
             Toast.makeText(this, "Something went wrong ${e.message}", Toast.LENGTH_SHORT).show()
